@@ -44,13 +44,11 @@ public final class CorpseScreen extends AbstractContainerScreen<CorpseMenu> {
     private double uy(double y) { return (y-oy)/scale; }
     @Override protected void renderBg(GuiGraphics g,float partial,int mouseX,int mouseY) {}
     @Override public void render(GuiGraphics g,int mouseX,int mouseY,float partial) {
-        renderBackground(g);
-        scale=Math.max(.1,Math.min(1,Math.min((width-8D)/imageWidth,(height-8D)/imageHeight)));
-        ox=width*(1-scale)/2;oy=height*(1-scale)/2;
+        renderBackground(g);InventoryFrame.draw(g,width,height);
+        var placement=InventoryFrame.fit(width,height,imageWidth,imageHeight,leftPos,topPos);
+        scale=placement.scale();ox=placement.offsetX();oy=placement.offsetY();
         mx=(int)Math.floor(ux(mouseX));my=(int)Math.floor(uy(mouseY));
         g.pose().pushPose();g.pose().translate(ox,oy,0);g.pose().scale((float)scale,(float)scale,1);
-        LoadoutPanel.box(g,leftPos,topPos,imageWidth,imageHeight);
-        g.fill(leftPos+2,topPos+2,leftPos+imageWidth-2,topPos+imageHeight-2,0xFF111820);
         LoadoutPanel.small(g,Component.translatable("container.minecrafteft.loadout").getString(),leftPos+12,topPos+10,.85F,0xFFE5EDF3);
         personal.draw(g,leftPos+4,topPos+2,mx,my,scale,ox,oy,menu.getCarried());
         drawBody(g);
@@ -193,6 +191,9 @@ public final class CorpseScreen extends AbstractContainerScreen<CorpseMenu> {
         return null;
     }
     @Override public Slot getSlotUnderMouse() { return at(mx,my); }
+    @Override protected boolean hasClickedOutside(double x,double y,int left,int top,int button) {
+        return !InventoryFrame.bounds(width,height).contains(ox+x*scale,oy+y*scale);
+    }
     private boolean overDeathVitals(double px,double py) {
         int x=left()+3,y=top()+102-scroll;
         return inside(px,py) && px>=x && px<x+72 && py>=y && py<y+47;

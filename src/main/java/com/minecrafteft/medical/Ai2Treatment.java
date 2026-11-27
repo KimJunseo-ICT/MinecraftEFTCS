@@ -81,6 +81,7 @@ public final class Ai2Treatment {
         };
         if(cured) spend(session.stack(),cost);
         if(entity instanceof ServerPlayer player) {
+            com.minecrafteft.profile.ProfileEvents.count(player,"Medicine");
             player.getCooldowns().addCooldown(session.stack().getItem(),Ai2TreatmentProgress.REUSE_DELAY_TICKS);
             com.minecrafteft.status.StatusEvents.sync(player);
         }

@@ -33,6 +33,12 @@ public final class StatusState {
         if(arm) leg=true;else if(leg) arm=true;else if(roll<.6) arm=true;else leg=true;
         return true;
     }
+    /** A landing cannot injure an arm or turn an existing leg fracture into an arm fracture. */
+    public boolean fractureLeg() {
+        if(leg) return false;
+        leg=true;
+        return true;
+    }
     public boolean splint() { if(leg) { leg=false;return true; }if(arm) { arm=false;return true; }return false; }
     public void painkillers() { pain=PAINKILLER_TICKS; }
     public boolean cureLight() { if(light==0) return false;light--;return true; }

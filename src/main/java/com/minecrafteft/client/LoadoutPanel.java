@@ -15,6 +15,7 @@ public final class LoadoutPanel {
     public static final int WIDTH=438,HEIGHT=276;
     private final LoadoutSlots slots;
     private final boolean compact;
+    private boolean renewed,healthMode;
     private final List<Hit> hits=new ArrayList<>();
     private final List<GridArea> grids=new ArrayList<>();
     private int scroll,maxScroll,x,y;
@@ -26,13 +27,19 @@ public final class LoadoutPanel {
     private record GridArea(EquipmentGrid grid,List<Slot> slots,int x,int y) { }
     public LoadoutPanel(LoadoutSlots slots) { this(slots,false); }
     public LoadoutPanel(LoadoutSlots slots,boolean compact) { this.slots=slots;this.compact=compact; }
-    private int panelWidth() { return compact?WIDTH-54:WIDTH; }
-    private int rightX() { return x+(compact?-54:0); }
+    public void renewed(boolean health) { renewed=true;healthMode=health; }
+    public void clearHits() { hits.clear();grids.clear(); }
+    private int panelWidth() { return renewed?608:compact?WIDTH-54:WIDTH; }
+    private int rightX() { return x+(renewed?86:compact?-54:0); }
+    private int rightWidth() { return renewed?282:204; }
+    private int bottom() { return renewed?267:263; }
     public void draw(GuiGraphics g,int x,int y,int mouseX,int mouseY,double scale,double ox,double oy,ItemStack carried) {
         healthMouseX=mouseX;healthMouseY=mouseY;
         this.x=x;this.y=y;this.scale=scale;offsetX=ox;offsetY=oy;hits.clear();grids.clear();
         g.pose().pushPose();g.pose().translate(0,0,210);
         g.fill(x+4,y+22,x+panelWidth(),y+HEIGHT-4,0xFF111820);
+        if(renewed) drawRenewed(g,mouseX,mouseY);
+        else {
         int characterX=x+(compact?12:98),characterWidth=compact?104:74,characterCenter=characterX+characterWidth/2;
         box(g,characterX,y+28,characterWidth,144);scissor(g,characterX+1,y+29,characterX+characterWidth-1,y+171);
         try { InventoryScreen.renderEntityInInventoryFollowsMouse(g,characterCenter,y+165,59,characterCenter-mouseX,y+88-mouseY,slots.player); }
@@ -47,24 +54,26 @@ public final class LoadoutPanel {
         fixed(g,slots.hotbar.get(2),x+12,y+230,compact?104:126,34,"primary2",mouseX,mouseY);
         fixed(g,slots.hotbar.get(0),x+(compact?128:150),y+188,compact?36:68,34,"sidearm",mouseX,mouseY);
         fixed(g,slots.melee,x+(compact?128:150),y+230,compact?36:68,34,"melee",mouseX,mouseY);
+        }
         int rx=rightX();
-        box(g,rx+228,y+28,204,236);
+        box(g,rx+228,y+28,rightWidth(),bottom()-27);
         var state=LoadoutState.of(slots.player);int bagHeight=state.backpack.size().height()*18;
-        int bagTop=128;
+        int bagTop=renewed?140:128;
         int secureTop=bagTop+Math.max(38,bagHeight)+6;
         int recoveryTop=secureTop+Math.max(42,state.secure.size().height()*18)+18;
         boolean recovery=slots.recovery.stream().anyMatch(Slot::hasItem);
-        maxScroll=Math.max(0,(recovery?recoveryTop+91:secureTop+Math.max(38,state.secure.size().height()*18))-263);
+        maxScroll=Math.max(0,(recovery?recoveryTop+91:secureTop+Math.max(38,state.secure.size().height()*18))-bottom());
         scroll=Math.min(scroll,maxScroll);
-        scissor(g,rx+230,y+29,rx+427,y+263);
+        scissor(g,rx+230,y+29,rx+228+rightWidth()-5,y+bottom());
         try {
             text(g,"pockets",rx+236,y+35-scroll,.8F,0xFFB8C4CE);
             for(int i=0;i<6;i++) {
-                Slot slot=slots.hotbar.get(i+3);cell(g,slot,rx+236+i*29,y+49-scroll,26,23,mouseX,mouseY);
-                small(g,Integer.toString(i+4),rx+238+i*29,y+50-scroll,.55F,0xFF97A6B4);
+                int pitch=renewed?38:29;
+                Slot slot=slots.hotbar.get(i+3);cell(g,slot,rx+236+i*pitch,y+49-scroll,renewed?34:26,renewed?27:23,mouseX,mouseY);
+                small(g,Integer.toString(i+4),rx+238+i*pitch,y+50-scroll,.55F,0xFF97A6B4);
             }
-            fixed(g,slots.offhand,rx+236,y+82-scroll,32,30,"offhand",mouseX,mouseY);
-            int toggleY=y+119-scroll;
+            fixed(g,slots.offhand,rx+236,y+(renewed?88:82)-scroll,renewed?36:32,30,"offhand",mouseX,mouseY);
+            int toggleY=y+(renewed?131:119)-scroll;
             g.fill(rx+236,toggleY,rx+246,toggleY+8,state.hideBackpack?0xFF7CBA8D:0xFF48525C);
             text(g,"backpack_visibility",rx+250,toggleY,.65F,0xFFAFBCC6);
             fixed(g,slots.bag,rx+236,y+bagTop-scroll,36,38,"backpack",mouseX,mouseY);
@@ -76,11 +85,35 @@ public final class LoadoutPanel {
                 for(int i=0;i<36;i++) cell(g,slots.recovery.get(i),rx+236+i%10*18,y+recoveryTop+13+i/10*18-scroll,16,16,mouseX,mouseY);
             }
         } finally { g.disableScissor(); }
-        g.fill(rx+428,y+31,rx+430,y+261,0xFF29343E);
-        int thumb=maxScroll==0?230:Math.max(18,230*234/(234+maxScroll));
-        int thumbY=y+31+(maxScroll==0?0:(230-thumb)*scroll/maxScroll);
-        g.fill(rx+428,thumbY,rx+430,thumbY+thumb,0xFF91A5B0);
+        int track=bottom()-33,barX=rx+228+rightWidth()-4;
+        g.fill(barX,y+31,barX+2,y+31+track,0xFF29343E);
+        int thumb=maxScroll==0?track:Math.max(18,track*(bottom()-29)/(bottom()-29+maxScroll));
+        int thumbY=y+31+(maxScroll==0?0:(track-thumb)*scroll/maxScroll);
+        g.fill(barX,thumbY,barX+2,thumbY+thumb,0xFF91A5B0);
         g.pose().popPose();
+    }
+    private void drawRenewed(GuiGraphics g,int mx,int my) {
+        if(healthMode) MenuVitals.draw(g,slots.player,x+12,y+28,152,240,true);
+        else {
+            fixed(g,slots.hotbar.get(1),x+12,y+28,152,52,"primary1",mx,my);
+            fixed(g,slots.hotbar.get(2),x+12,y+85,152,52,"primary2",mx,my);
+            fixed(g,slots.hotbar.get(0),x+12,y+142,92,30,"sidearm",mx,my);
+            fixed(g,slots.melee,x+110,y+142,54,30,"melee",mx,my);
+            fixed(g,slots.dogtag,x+116,y+184,48,48,"dogtag",mx,my);
+        }
+        box(g,x+168,y+28,80,144);scissor(g,x+169,y+29,x+247,y+171);
+        try { InventoryScreen.renderEntityInInventoryFollowsMouse(g,x+208,y+165,59,x+208-mx,y+88-my,slots.player); }
+        finally { g.disableScissor(); }
+        String[] armor={"head","chest","legs","feet"};
+        for(int i=0;i<4;i++) fixed(g,slots.armor.get(i),x+252,y+28+i*37,44,33,armor[i],mx,my);
+        if(healthMode || statusOpen) {
+            StatusPresentation.list(g,com.minecrafteft.status.StatusProvider.of(slots.player),x+168,y+184,128,84,statusScroll,mx,my,scale,offsetX,offsetY,!healthMode);
+        } else {
+            MenuVitals.draw(g,slots.player,x+168,y+184,128,84,false);
+            StatusPresentation.button(g,x+286,y+188,false);
+            if(mx>=x+286 && mx<x+293 && my>=y+188 && my<y+195)
+                g.renderTooltip(Minecraft.getInstance().font,Component.translatable("screen.minecrafteft.status_details"),mx,my);
+        }
     }
     private void scissor(GuiGraphics g,int left,int top,int right,int bottom) {
         g.enableScissor((int)Math.ceil(offsetX+left*scale),(int)Math.ceil(offsetY+top*scale),
@@ -157,25 +190,26 @@ public final class LoadoutPanel {
         return null;
     }
     public boolean inside(double mx,double my) { return mx>=x+4 && mx<x+panelWidth() && my>=y+22 && my<y+HEIGHT; }
-    public boolean insideViewport(double mx,double my) { return mx>=rightX()+230 && mx<rightX()+432 && my>=y+29 && my<y+263; }
+    public boolean insideViewport(double mx,double my) { return mx>=rightX()+230 && mx<rightX()+228+rightWidth() && my>=y+29 && my<y+bottom(); }
     public boolean scroll(double mx,double my,double delta) {
-        if(!compact && statusOpen && overHealth(mx,my)) {
-            int max=Math.max(0,StatusPresentation.rows(com.minecrafteft.status.StatusProvider.of(slots.player)).size()*23-80);
+        if(!compact && (statusOpen || healthMode) && overHealth(mx,my)) {
+            int max=Math.max(0,StatusPresentation.rows(com.minecrafteft.status.StatusProvider.of(slots.player)).size()*23-(renewed?65:80));
             statusScroll=Math.max(0,Math.min(max,statusScroll-(int)Math.signum(delta)*23));return true;
         }
         if(!insideViewport(mx,my)) return false;scroll=Math.max(0,Math.min(maxScroll,scroll-(int)Math.signum(delta)*18));return true;
     }
-    private boolean overHealth(double mx,double my) { return mx>=x+12 && mx<x+94 && my>=y+73 && my<y+172; }
-    public boolean toggleAt(double mx,double my) { return insideViewport(mx,my) && mx>=rightX()+236 && mx<rightX()+270 && my>=y+119-scroll && my<y+127-scroll; }
+    private boolean overHealth(double mx,double my) { return renewed?mx>=x+168 && mx<x+296 && my>=y+184 && my<y+268:mx>=x+12 && mx<x+94 && my>=y+73 && my<y+172; }
+    public boolean toggleAt(double mx,double my) { int top=y+(renewed?131:119)-scroll;return insideViewport(mx,my) && mx>=rightX()+236 && mx<rightX()+270 && my>=top && my<top+8; }
     public boolean beginDrag(double mx,double my) {
         if(!compact && overHealth(mx,my)) {
-            if(mx>=x+84 && mx<x+91 && my>=y+77 && my<y+84) { statusOpen=!statusOpen;statusScroll=0; }
+            int bx=x+(renewed?286:84),by=y+(renewed?188:77);
+            if(!healthMode && mx>=bx && mx<bx+7 && my>=by && my<by+7) { statusOpen=!statusOpen;statusScroll=0; }
             return true;
         }
-        if(mx<rightX()+426 || mx>=rightX()+434 || my<y+29 || my>=y+263) return false;
+        if(mx<rightX()+228+rightWidth()-6 || mx>=rightX()+228+rightWidth()+2 || my<y+29 || my>=y+bottom()) return false;
         dragging=true;drag(mx,my);return true;
     }
-    public boolean drag(double mx,double my) { if(!dragging) return false;scroll=(int)(Math.max(0,Math.min(1,(my-y-31)/230))*maxScroll);return true; }
+    public boolean drag(double mx,double my) { if(!dragging) return false;scroll=(int)(Math.max(0,Math.min(1,(my-y-31)/(bottom()-33)))*maxScroll);return true; }
     public boolean release() { boolean was=dragging;dragging=false;return was; }
     public static void stack(GuiGraphics g,ItemStack stack,int x,int y,int w,int h) {
         if(stack.isEmpty() || w<=0 || h<=0) return;
