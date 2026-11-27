@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "minecrafteft:heavy_bleeding",
+    "minecrafteft:light_bleeding",
+    "minecrafteft:fracture",
+    "minecrafteft:dehydration",
+    "minecrafteft:malnutrition"
+  ]
+}
