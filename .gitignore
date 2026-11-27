@@ -1,0 +1,63 @@
+# Gradle, compiled output and locally published artifacts
+/.gradle/
+/.gradle-user-home/
+/build/
+/out/
+/bin/
+/mcmodsrepo/
+*.class
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
+/libs/tacz-mappings.tsrg
+
+# Minecraft development instances: worlds, launch arguments, accounts, models and logs
+/run/
+/run-*/
+/logs/
+/crash-reports/
+*.log
+hs_err_pid*
+replay_pid*
+
+# IDE and operating-system files
+/.idea/
+/.vscode/
+/.settings/
+/.metadata/
+/.classpath
+/.project
+*.iml
+*.ipr
+*.iws
+*.launch
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Local agent state and generated caches
+/.codex/
+/.agents/
+src/generated/**/.cache/
+__pycache__/
+*.pyc
+
+# Credentials and private local configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+credentials.json
+secrets.json
+
+# Archives and editor scratch files; release artifacts belong in GitHub Releases
+*.zip
+*.7z
+*.tmp
+*.bak
+*~
+forge*changelog.txt

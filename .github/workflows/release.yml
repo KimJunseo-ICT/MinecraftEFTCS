@@ -1,0 +1,25 @@
+name: Record version release
+on:
+  push:
+    tags: ['v*']
+permissions:
+  contents: write
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Validate version and main ancestry
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: python3 tools/repository_policy.py --tag "$RELEASE_TAG"
+      - name: Record CHANGELOG as GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 tools/publish_release.py
