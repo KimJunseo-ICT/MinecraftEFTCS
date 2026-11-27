@@ -92,7 +92,9 @@ public final class VitalEvents {
                         VitalConfig.IDLE_RECOVERY.get()*(conditions!=null && conditions.malnourished()?.5:1));
                 if (state.sprintLocked() || state.sprintRestartRequired()) player.setSprinting(false);
                 if(conditions!=null) {
+                    boolean wasDehydrated=conditions.dehydrated();
                     var damage=conditions.tick(state.energy(),state.hydration(),before,state.stamina(),state.spentStamina());
+                    if(!wasDehydrated && conditions.dehydrated()) com.minecrafteft.profile.ProfileEvents.count(server,"Dehydrations");
                     if(damage.dehydration()>0) hurtWithStatus(server,damage.dehydration(),true,com.minecrafteft.status.StatusDamage.DEHYDRATION);
                     if(damage.malnutrition()>0) hurtWithStatus(server,damage.malnutrition(),true,com.minecrafteft.status.StatusDamage.MALNUTRITION);
                 }
@@ -135,7 +137,9 @@ public final class VitalEvents {
     public static void healWithTreatment(ServerPlayer player, float amount) {
         if (!player.isAlive() || !Float.isFinite(amount) || amount <= 0) return;
         player.getCapability(VitalProvider.CAPABILITY).ifPresent(state -> {
+            double before=state.health();
             state.heal(amount);
+            com.minecrafteft.profile.ProfileData.get(player).healed(player,state.health()-before);
             mirrorHealth(player, state);
             sync(player, state);
         });

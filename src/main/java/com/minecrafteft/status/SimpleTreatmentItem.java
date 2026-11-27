@@ -24,6 +24,7 @@ public final class SimpleTreatmentItem extends Item {
         if(!level.isClientSide) {
             var state=StatusProvider.of(entity);
             if(state!=null && (!splint || state.splint())) {
+                if(entity instanceof net.minecraft.server.level.ServerPlayer server) com.minecrafteft.profile.ProfileEvents.count(server,"Medicine");
                 if(!splint) state.painkillers();
                 stack.setDamageValue(stack.getDamageValue()+1);
                 if(stack.getDamageValue()>=stack.getMaxDamage()) { stack.shrink(1);entity.broadcastBreakEvent(entity.getUsedItemHand()); }

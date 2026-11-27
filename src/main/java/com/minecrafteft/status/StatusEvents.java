@@ -63,6 +63,7 @@ public final class StatusEvents {
     public static void injured(ServerPlayer player,DamageSource source) {
         if(player.isCreative() || player.isSpectator()) return;
         var state=StatusProvider.of(player);if(state==null) return;
+        int fracturesBefore=(state.arm()?1:0)+(state.leg()?1:0);
         // TACZ armor-piercing and ordinary damage parts are one hit, not two injury rolls.
         var impact=GUN_HITS.get(source);
         if(impact!=null && impact.processed) return;
@@ -79,8 +80,10 @@ public final class StatusEvents {
         }
         if(fall) {
             float height=FALLS.getOrDefault(player,player.fallDistance);FALLS.remove(player);
-            if(player.getRandom().nextDouble()<StatusState.fallChance(height)) state.fracture(player.getRandom().nextDouble());
+            if(player.getRandom().nextDouble()<StatusState.fallChance(height)) state.fractureLeg();
         }
+        int fracturesAfter=(state.arm()?1:0)+(state.leg()?1:0);
+        if(fracturesAfter>fracturesBefore) com.minecrafteft.profile.ProfileData.get(player).increment(player,"Fractures",fracturesAfter-fracturesBefore);
         sync(player);
     }
     public static void sync(Player player) {

@@ -8,7 +8,7 @@ import com.minecrafteft.MinecraftEFTMod;
 import java.util.Optional;
 
 public final class ModNetwork {
-    private static final String PROTOCOL = "15";
+    private static final String PROTOCOL = "16";
     public static final SimpleChannel CHANNEL = NetworkRegistry.ChannelBuilder
             .named(new ResourceLocation(MinecraftEFTMod.MOD_ID, "main"))
             .networkProtocolVersion(() -> PROTOCOL)
@@ -19,6 +19,10 @@ public final class ModNetwork {
     private ModNetwork() {}
 
     public static void register() {
+        CHANNEL.messageBuilder(ProfileSyncPacket.class,9,net.minecraftforge.network.NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(ProfileSyncPacket::encode).decoder(ProfileSyncPacket::new).consumerMainThread(ProfileSyncPacket::handle).add();
+        CHANNEL.messageBuilder(ProfileLevelPacket.class,10,net.minecraftforge.network.NetworkDirection.PLAY_TO_SERVER)
+                .encoder(ProfileLevelPacket::encode).decoder(ProfileLevelPacket::new).consumerMainThread(ProfileLevelPacket::handle).add();
         CHANNEL.messageBuilder(SprintRestartPacket.class,8,net.minecraftforge.network.NetworkDirection.PLAY_TO_SERVER)
                 .encoder(SprintRestartPacket::encode).decoder(SprintRestartPacket::new).consumerMainThread(SprintRestartPacket::handle).add();
         CHANNEL.messageBuilder(StatusSyncPacket.class,7,net.minecraftforge.network.NetworkDirection.PLAY_TO_CLIENT)

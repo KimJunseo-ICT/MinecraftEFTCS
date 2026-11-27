@@ -39,13 +39,13 @@ public final class PortableBackpackScreen extends AbstractContainerScreen<Portab
         int anchor=menu.contents.anchorAt(cell);return menu.bagSlots.get(anchor<0?cell:anchor);
     }
     @Override protected void renderBg(GuiGraphics g,float partial,int mx,int my) {
-        LoadoutPanel.box(g,leftPos,topPos,imageWidth,imageHeight);
     }
     @Override protected void renderLabels(GuiGraphics g,int x,int y) { }
     @Override protected void renderTooltip(GuiGraphics g,int x,int y) { }
     @Override public void render(GuiGraphics g,int mouseX,int mouseY,float partial) {
-        renderBackground(g);scale=Math.max(.1,Math.min(1,Math.min((width-16D)/imageWidth,(height-16D)/imageHeight)));
-        ox=width*(1-scale)/2;oy=height*(1-scale)/2;mx=(int)ux(mouseX);my=(int)uy(mouseY);
+        renderBackground(g);InventoryFrame.draw(g,width,height);
+        var placement=InventoryFrame.fit(width,height,imageWidth,imageHeight,leftPos,topPos);
+        scale=placement.scale();ox=placement.offsetX();oy=placement.offsetY();mx=(int)ux(mouseX);my=(int)uy(mouseY);
         var carried=menu.getCarried();menu.setCarried(ItemStack.EMPTY);
         g.pose().pushPose();g.pose().translate(ox,oy,0);g.pose().scale((float)scale,(float)scale,1);
         try { super.render(g,mx,my,partial); } finally { menu.setCarried(carried); }
@@ -84,6 +84,9 @@ public final class PortableBackpackScreen extends AbstractContainerScreen<Portab
         return super.mouseClicked(px,py,button);
     }
     @Override public Slot getSlotUnderMouse() { return slotAt(mx,my,menu.getCarried()); }
+    @Override protected boolean hasClickedOutside(double x,double y,int left,int top,int button) {
+        return !InventoryFrame.bounds(width,height).contains(ox+x*scale,oy+y*scale);
+    }
     @Override public boolean keyPressed(int key,int scan,int modifiers) {
         hoveredSlot=getSlotUnderMouse();
         if(key==GLFW.GLFW_KEY_R && StashMenu.isGridItem(menu.getCarried())) { minecraft.gameMode.handleInventoryButtonClick(menu.containerId,1);return true; }

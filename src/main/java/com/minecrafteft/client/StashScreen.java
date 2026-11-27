@@ -61,11 +61,6 @@ public final class StashScreen extends AbstractContainerScreen<StashMenu> {
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
         int x = leftPos;
         int y = topPos;
-        graphics.fill(x, y, x + imageWidth, y + imageHeight, 0xEE111820);
-        graphics.fill(x, y, x + imageWidth, y + 2, 0xFF758391);
-        graphics.fill(x, y + imageHeight - 2, x + imageWidth, y + imageHeight, 0xFF758391);
-        graphics.fill(x, y, x + 2, y + imageHeight, 0xFF758391);
-        graphics.fill(x + imageWidth - 2, y, x + imageWidth, y + imageHeight, 0xFF758391);
 
         graphics.fill(x + stashX - 22, y + 10, x + stashX - 21, y + imageHeight - 8, 0xFF46515A);
         graphics.fill(x + 7, y + 37, x + 184, y + 38, 0xFF46515A);
@@ -515,10 +510,9 @@ public final class StashScreen extends AbstractContainerScreen<StashMenu> {
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         renderBackground(graphics);
-        uiScale = Math.min(1.0D, Math.min((width - 16.0D) / imageWidth, (height - 16.0D) / imageHeight));
-        uiScale = Math.max(0.1D, uiScale);
-        uiOffsetX = width * (1.0D - uiScale) / 2.0D;
-        uiOffsetY = height * (1.0D - uiScale) / 2.0D;
+        InventoryFrame.draw(graphics,width,height);
+        var placement=InventoryFrame.fit(width,height,imageWidth,imageHeight,leftPos,topPos);
+        uiScale=placement.scale();uiOffsetX=placement.offsetX();uiOffsetY=placement.offsetY();
         int uiMouseX = (int) toUiX(mouseX);
         int uiMouseY = (int) toUiY(mouseY);
         currentMouseX = uiMouseX;
@@ -772,6 +766,9 @@ public final class StashScreen extends AbstractContainerScreen<StashMenu> {
 
     private double toUiX(double x) {
         return (x - uiOffsetX) / uiScale;
+    }
+    @Override protected boolean hasClickedOutside(double x,double y,int left,int top,int button) {
+        return !InventoryFrame.bounds(width,height).contains(uiOffsetX+x*uiScale,uiOffsetY+y*uiScale);
     }
 
     private double toUiY(double y) {

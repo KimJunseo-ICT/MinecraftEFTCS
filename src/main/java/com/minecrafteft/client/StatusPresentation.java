@@ -126,9 +126,12 @@ public final class StatusPresentation {
         list(g,state,x,y,82,99,scroll,mx,my,scale,ox,oy);
     }
     public static void list(GuiGraphics g,StatusState state,int x,int y,int width,int height,int scroll,int mx,int my,double scale,double ox,double oy) {
+        list(g,state,x,y,width,height,scroll,mx,my,scale,ox,oy,true);
+    }
+    public static void list(GuiGraphics g,StatusState state,int x,int y,int width,int height,int scroll,int mx,int my,double scale,double ox,double oy,boolean closeButton) {
         LoadoutPanel.box(g,x,y,width,height);
         LoadoutPanel.small(g,Component.translatable("screen.minecrafteft.status_list").getString(),x+4,y+5,.6F,0xFFE5EDF3);
-        button(g,x+width-10,y+4,true);
+        if(closeButton) button(g,x+width-10,y+4,true);
         int viewport=height-19;
         var rows=rows(state);int max=Math.max(0,rows.size()*23-viewport);scroll=Math.min(scroll,max);
         g.enableScissor((int)Math.ceil(ox+(x+2)*scale),(int)Math.ceil(oy+(y+15)*scale),
