@@ -1,0 +1,10 @@
+tsrg2 left right
+com/tacz/guns/mixin/common/ServerPlayNetHandlerMixin com/tacz/guns/mixin/common/ServerPlayNetHandlerMixin
+	player f_9743_
+com/github/mcmodderanchor/simplebedrockmodel/v1/mixin/ServerPlayNetHandlerMixin com/github/mcmodderanchor/simplebedrockmodel/v1/mixin/ServerPlayNetHandlerMixin
+	player f_9743_
+com/github/mcmodderanchor/simplebedrockmodel/v1/mixin/client/GameRendererMixin com/github/mcmodderanchor/simplebedrockmodel/v1/mixin/client/GameRendererMixin
+	getMinecraft ()Lnet/minecraft/client/Minecraft; m_172797_
+com/tacz/guns/mixin/client/GameRendererMixin com/tacz/guns/mixin/client/GameRendererMixin
+	getMinecraft ()Lnet/minecraft/client/Minecraft; m_172797_
+	render (FJZ)V m_109093_

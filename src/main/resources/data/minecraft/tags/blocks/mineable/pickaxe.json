@@ -1,0 +1,16 @@
+{
+  "replace": false,
+  "values": [
+    "minecrafteft:personal_stash_1",
+    "minecrafteft:personal_stash_2",
+    "minecrafteft:personal_stash_3",
+    "minecrafteft:personal_stash_4",
+    "minecrafteft:stash_container_part",
+    "minecrafteft:large_weapon_case",
+    "minecrafteft:weapon_case_part",
+    "minecrafteft:weapon_case",
+    "minecrafteft:weapon_case_ar_team",
+    "minecrafteft:weapon_case_elmo",
+    "minecrafteft:weapon_case_hide404"
+  ]
+}
